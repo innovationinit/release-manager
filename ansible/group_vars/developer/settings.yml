@@ -1,0 +1,20 @@
+# vim: ft=ansible
+---
+
+APPLICATION:
+  ALLOWED_CIDR_NETS:
+    - "127.0.0.1/8"
+  ALLOWED_HOSTS:
+    - "*"
+  BASIC_AUTH_PASS: "admin"
+  BASIC_AUTH_USER: "admin"
+  DEBUG: "True"
+  ENVIRONMENT: "{{ lookup('env', 'ENVIRONMENT') }}"
+  GITLAB_HOST: "https://gitlab.example.com"
+  GITLAB_PRIVATE_TOKEN: "thisIsMyPrivateToken"
+  JIRA_HOST: "https://jira.example.com"
+  JIRA_PASSWORD: ''
+  JIRA_PROJECTS: [KPL,GPL,SOK,EMAIL,BOFF,TELCO,LMI,CMM,LIF]
+  JIRA_USERNAME: ''
+  PROJECTS: '[{"name": "Release Manager Test", "gitlab_id": "release-manager-test", "production_environment_branch": "master", "merges": [{"merge_type": "DEV", "source_branch": "develop", "target_branch": "stage"}, {"merge_type": "PROD", "source_branch": "stage", "target_branch": "master"}, {"merge_type": "MAINTENANCE", "source_branch": "master", "target_branch": "stage"}, {"merge_type": "MAINTENANCE", "source_branch": "stage", "target_branch": "develop"}], "versioning_scheme": "DATE_BASED", "tag_group": "TAG_GROUP1","production_release_jira_transitions": ["To deploy", "Close"], "jira_warning_labels": ["DEPLOY-WARN"]}]'
+  ROCKET_HOOK_URL: ''

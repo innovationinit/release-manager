@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+WEBAPPS=$(docker ps | grep "release-manager-backend" | awk '{print $1}'); docker exec -it $WEBAPPS /bin/bash -c 'cd /release-manager; exec /bin/bash'

@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+cd $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) || exit 1
+
+source /scripts/verify-common
+
+cd /release-manager  # going to the main directory of the project
+
+function _check() {
+    diff <(echo "$1") <(echo "$2")
+}
+
+# get the current .po files content
+old_pl_django_po=`cat locale/pl/LC_MESSAGES/django.po`
+
+# update the .po files
+/scripts/makemessages > /dev/null || _fail "/scripts/makemessages failed"
+
+# get the updated .po files content
+new_pl_django_po=`cat locale/pl/LC_MESSAGES/django.po`
+
+# restore .po files content
+echo "$old_pl_django_po" > locale/pl/LC_MESSAGES/django.po
+
+# check if the old and updated .po files content differ
+_check "$old_pl_django_po" "$new_pl_django_po" || _fail "Please fix i18n: pl/django.po Details above"

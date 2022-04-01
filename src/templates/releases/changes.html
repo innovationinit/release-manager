@@ -1,0 +1,50 @@
+{% load static %}
+
+{% if changes %}
+  <div class="columns">
+    <div class="column">
+      <nav class="panel commit-log-panel">
+        {% for change in changes %}
+          <div class="panel-block {% if change.commit.parent_ids|length == 1 %}is-active{% endif %}">
+            <span class="panel-icon">
+              {% if change.commit.parent_ids|length > 1 %}
+                <ion-icon name="git-merge"></ion-icon>
+              {% else %}
+                <ion-icon name="git-commit"></ion-icon>
+              {% endif %}
+            </span>
+            <span class="is-size-7 {% if change.commit.parent_ids|length > 1 %}has-text-grey-light{% endif %}">
+              {{ change.commit.message|linebreaksbr }}
+            </span>
+            &nbsp;
+            <div class="buttons has-addons">
+              <a href="{{ gitlab_host }}/{{ project.gitlab_id }}/commit/{{ change.commit.id }}" target="_blank" class="button is-warning is-small"><i class="icon-gitlab"></i></a>
+              {% if change.jira_issue %}
+                <a
+                  href="{{ jira_host }}/browse/{{ change.jira_issue.key }}"
+                  target="_blank"
+                  class="button is-link is-small has-tooltip-bottom"
+                  data-tooltip="{{ change.jira_issue.key }} {{ change.jira_issue.summary }}"
+                >
+                  <i class="icon-jira"></i>
+                </a>
+              {% endif %}
+              {% if change.warning_labels %}
+                <a
+                  href="{{ jira_host }}/browse/{{ change.jira_issue.key }}"
+                  target="_blank"
+                  class="button is-danger is-small has-tooltip-bottom"
+                  data-tooltip="{% for label in change.warning_labels %}{{ label }}{% if not forloop.last %}, {% endif %}{% endfor %}"
+                >
+                  <i class="fas fa-exclamation"></i>
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </nav>
+    </div>
+  </div>
+{% else %}
+  <div class="notification is-size-7"><span class="tag"><i class="fas fa-info"></i></span> No changes</div>
+{% endif %}

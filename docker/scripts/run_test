@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+set -e
+
+cd /release-manager
+
+EXIT_STATUS=0
+
+python manage.py compilemessages
+python manage.py test --logging-clear-handlers --with-coverage  || EXIT_STATUS=$?
+
+exit $EXIT_STATUS

@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+cd $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) || exit 1
+
+source verify-common
+
+EXIT_STATUS=0
+
+_heading "Checking Python code"
+/scripts/verify-python-code && tick || { EXIT_STATUS=$?; cross; }
+
+_spacing
+
+_heading "Checking import formatting (project)"
+/scripts/verify-imports && tick || { EXIT_STATUS=$?; cross; }
+
+_spacing
+
+_heading "Running Django checks"
+cd /release-manager
+./manage.py check && tick || { EXIT_STATUS=$?; cross; }
+
+_spacing
+
+_heading "Checking if translations are up to date"
+/scripts/verify-translations && tick || { EXIT_STATUS=$?; cross; } # displays a message
+
+_spacing
+
+_heading "Checking if there are any clashing migrations"
+cd /release-manager
+./manage.py compilemessages
+/scripts/verify-migration-clashes && tick || { _display_message "Migrations above clash"; cross; EXIT_STATUS=1; }
+
+_spacing
+
+_heading "Checking if any migration is missing"
+cd /release-manager
+python manage.py compilemessages
+/scripts/verify-missing-migrations && tick || { _display_message "A migration above is missing"; cross; EXIT_STATUS=1; }
+
+echo ""
+
+exit $EXIT_STATUS

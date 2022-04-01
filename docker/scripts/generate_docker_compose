@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -e
+
+ENVIRONMENT=$1
+CONTAINER_ID=$2
+DOCKER_TAG=$3
+
+if [ -z "${ENVIRONMENT}" ]
+then
+        ENVIRONMENT=dev
+fi
+
+GIT_HEAD=`git rev-parse --short HEAD`
+
+if [ ${ENVIRONMENT} == 'dev' ]
+    OVERRIDE_UID=`id -u`
+    OVERRIDE_GID=`id -g`
+then
+    ENVIRONMENT=${ENVIRONMENT} CONTAINER_ID=$2 VERSION=${GIT_HEAD} DOCKER_TAG=$DOCKER_TAG OVERRIDE_UID=${OVERRIDE_UID} OVERRIDE_GID=$OVERRIDE_GID ansible-playbook ansible/generate_docker_compose.yml -i ansible/inventory/developer
+else
+    ENVIRONMENT=${ENVIRONMENT} CONTAINER_ID=$2 VERSION=${GIT_HEAD} DOCKER_TAG=$DOCKER_TAG ansible-playbook ansible/generate_docker_compose.yml -i ansible/inventory/developer
+fi
+
+if [ ${ENVIRONMENT} == 'ci' ]
+then
+    mv docker-compose.yml docker-compose-${CI_JOB_ID}.yml
+fi

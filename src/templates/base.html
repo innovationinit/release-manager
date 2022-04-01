@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+
+{% load static %}
+
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Release Manager</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css">
+  <link rel="stylesheet" href="{% static 'app.css' %}">
+  <link rel="stylesheet" href="{% static 'bulma-tooltip.min.css' %}">
+  <script defer src="https://use.fontawesome.com/releases/v5.1.0/js/all.js"></script>
+  <script src="https://unpkg.com/ionicons@4.5.5/dist/ionicons.js"></script>
+  <script defer src="{% static 'app.js' %}"></script>
+</head>
+<body>
+  <section class="section">
+    <div class="container">
+      <h1 class="title">
+        <a href="{% url 'releases:releases' %}">Release Manager</a>
+      </h1>
+      <p class="subtitle">
+        Use with <strong>caution</strong>!
+      </p>
+    </div>
+  </section>
+  {% if messages %}
+    <section class="notifications">
+      <div class="container">
+        <div class="columns">
+          <div class="column">
+            {% for message in messages %}
+              <div class="notification is-primary {% if message.tags == 'error' %}is-danger{% endif %}">
+                <button class="delete"></button>
+                {{ message }}
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </section>
+  {% endif %}
+  <section class="section">
+    {% block 'content' %}
+    {% endblock %}
+  </section>
+  <div class="modal progress-modal">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+      <div class="box">
+        <h2 class="subtitle">Performing the operation...</h2>
+        <progress class="progress is-small is-info" max="100">45%</progress>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

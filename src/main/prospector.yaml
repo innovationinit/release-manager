@@ -1,0 +1,27 @@
+doc-warnings: true
+test-warnings: true
+autodetect: true
+member-warnings: true
+
+ignore-patterns:
+  - ^.*/migrations/.*\.py$
+  - docs/.*\.py
+
+pep257:
+  disable:
+    - D211
+    - D213
+    - D107
+
+pep8:
+  options:
+    max-line-length: 150
+
+pylint:
+  disable:
+    - model-missing-unicode
+    - inconsistent-return-statements
+    - raising-format-tuple
+  options:
+    max-args: 10
+    max-locals: 16

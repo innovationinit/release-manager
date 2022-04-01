@@ -1,0 +1,2 @@
+{% for key, value in ENV.items()|sort %}{{ key }}={{ value }}
+{% endfor %}

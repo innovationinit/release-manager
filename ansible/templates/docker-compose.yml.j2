@@ -1,0 +1,25 @@
+version: "3"
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  backend{{ CONTAINER_ID }}:
+    container_name: {{ APP_NAME }}-backend{{ CONTAINER_ID }}
+{% if APPLICATION.ENVIRONMENT == 'ci' %}
+    image: {{ APP_IMAGE }}:{{ ENV.DOCKER_TAG }}
+{% else %}
+    image: {{ APP_NAME }}-developer:latest
+{% endif %}
+    networks:
+      - app-tier
+    env_file: .environment
+{% if APPLICATION.ENVIRONMENT == 'dev' %}
+    volumes:
+      - ./src:/release-manager
+      - ./docker/scripts:/scripts
+    ports:
+      - "8080:8080"
+{% endif %}
+

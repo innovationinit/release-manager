@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block 'content' %}
+  <div class="container">
+    {% if warning_messages %}
+      <div class="columns">
+        <div class="column">
+          <article class="message is-warning">
+            <div class="message-body">
+              <h6 class="title is-6">Configuration warnings</h6>
+              {% for warning_message in warning_messages %}
+                <p>{{ warning_message }}</p>
+              {% endfor %}
+            </div>
+          </article>
+        </div>
+      </div>
+    {% endif %}
+    <div class="columns">
+      {% if projects|length > 1 %}
+        <div class="column is-one-fifth menu-column">
+          <aside class="menu sticky">
+            <ul class="menu-list">
+              {% for project_context in projects %}
+                <li>
+                  <a href="#{{ project_context.project.gitlab_id }}">
+                    {{ project_context.project.name }}
+                    {% include 'releases/project_badges.html' %}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </aside>
+        </div>
+      {% endif %}
+      <div class="column">
+        {% for project_context in projects %}
+          <div class="columns" id="{{ project_context.project.gitlab_id }}">
+            <div class="column">
+              <div class="card project-card">
+                <header class="card-header">
+                  <p class="card-header-title">{{ project_context.project.name }}<span class="margin-left-1em">{% include 'releases/project_badges.html' %}</span></p>
+                  <div class="buttons">
+                    <a href="{{ gitlab_host }}/{{ project_context.project.gitlab_id }}" target="_blank" class="button is-small is-warning"><i class="icon-gitlab"></i>&nbsp;GitLab project</a>
+                  </div>
+                </header>
+                <div class="card-content">
+                  <div class="content">
+                    <div class="columns">
+                      {% for merge_request_context in project_context.merge_requests %}
+                        <div class="column">
+                          <h6>{{ merge_request_context.merge_request.merge_type }} <span class="has-text-weight-normal">{{ merge_request_context.merge_request.source_branch }} -> {{ merge_request_context.merge_request.target_branch }}</span></h6>
+
+                          <p>Changes that will get merged:</p>
+                          {% include 'releases/changes.html' with project=project_context.project changes=merge_request_context.changes %}
+
+                          <form action="{% url 'releases:create-merge-request' %}" method="post">
+                            {% csrf_token %}
+                            <div class="is-hidden">
+                              {{ merge_request_context.merge_request_form.as_p }}
+                            </div>
+                            <p>
+                              <button
+                                type="submit"
+                                class="button {% if merge_request_context.merge_request.merge_type == merge_request_context.merge_request.MergeType.DEV %}is-primary{% elif merge_request_context.merge_request.merge_type == merge_request_context.merge_request.MergeType.PROD %}is-danger{% endif %}"
+                                {% if not merge_request_context.changes %}disabled{% endif %}
+                              >
+                                Merge!
+                              </button>
+                            </p>
+                          </form>
+                        </div>
+                      {% endfor %}
+                    </div>
+
+
+                    <h6>Create a release tag on {{ project_context.project.production_environment_branch }} branch</h6>
+
+                    <p>Changes since the last tag:</p>
+                    <div class="columns">
+                      <div class="column is-half">
+                        {% include 'releases/changes.html' with project=project_context.project changes=project_context.tag_changes %}
+                      </div>
+                    </div>
+
+                    <form action="{% url 'releases:create-tag' %}" method="post">
+                      {% csrf_token %}
+                      {% if project_context.other_projects_in_tag_group %}<p>This project shares tags with: {% for project in project_context.other_projects_in_tag_group %}<a href="#{{ project.gitlab_id }}">{{ project.name }}</a>{% if not forloop.last %}, {% endif %}{% endfor %}.</p>{% endif %}
+                      <p>Latest tag is <span class="tag">{{ project_context.latest_tag }}</span>. {% if project_context.latest_tag_group_tag and project_context.latest_tag_group_tag != project_context.latest_tag %}Latest tag of projects sharing tags with this project is <span class="tag">{{ project_context.latest_tag_group_tag }}</span>. {% endif %}Suggestions: {% for suggestion in project_context.tag_suggestions %}<a href="#" class="tag-suggestion" data-major="{{ suggestion.major }}" data-minor="{{ suggestion.minor }}" data-patch="{{ suggestion.patch }}" data-fix="{{ suggestion.fix|default_if_none:'' }}"><span class="tag {% if suggestion.fix %}is-danger{% elif suggestion.patch %}is-warning{% else%}is-info{% endif %}">{{ suggestion }}</span></a>{% if forloop.last %}.{% else %} {% endif %}{% endfor %}</p>
+                      {% for hidden in project_context.tag_form.hidden_fields %}
+                        {{ hidden }}
+                      {% endfor %}
+                      {% for field in project_context.tag_form.visible_fields %}
+                        <div class="field is-horizontal">
+                          <div class="field-label">{{ field.label_tag }}</div>
+                          <div class="field-body">
+                            <div class="field">
+                              <div class="control">{{ field }}</div>
+                              <p class="help">{{ field.help_text }}</p>
+                            </div>
+                          </div>
+                        </div>
+                      {% endfor %}
+                      <div class="field is-horizontal">
+                        <div class="field-label"></div>
+                          <div class="field-body">
+                            <div class="field">
+                              <div class="control">
+                                <button type="submit" class="button is-danger" {% if project_context.latest_tag and not project_context.tag_changes %}disabled{% endif %}>Release!</button>
+                              </div>
+                            </div>
+                          </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

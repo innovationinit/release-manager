@@ -1,0 +1,15 @@
+# vim: ft=ansible
+---
+
+- hosts: all
+  connection: local
+  gather_facts: False
+
+  tasks:
+    - name: Save application environment variables in the .environment file
+      template: src=templates/docker-compose.environment dest=./../.environment
+      vars:
+        environment_variables: "{{ ENV }}"
+
+    - name: Docker compose generate
+      template: src=templates/docker-compose.yml.j2 dest=./../docker-compose.yml

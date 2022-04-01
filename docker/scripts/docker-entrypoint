@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -e
+
+function assertPresence() {
+    VARIABLE_NAME=$1
+    if [ -z ${!VARIABLE_NAME} ]; then
+        echo "${VARIABLE_NAME} is unset. Please set this label to run this docker container";
+        exit 1
+    fi
+}
+
+exec "$@"
+
+assertPresence ENVIRONMENT
+
+if [ $ENVIRONMENT == 'dev' ]
+then
+    exec python manage.py runserver 0:8080
+else
+    rm -rf /etc/nginx/conf.d/*
+    ln -s /etc/nginx/sites-available/release-manager.conf /etc/nginx/conf.d/default.conf
+    assertPresence BASIC_AUTH_USER
+    assertPresence BASIC_AUTH_PASS
+    htpasswd -nb $BASIC_AUTH_USER $BASIC_AUTH_PASS > /etc/nginx/release_manager_htpasswd
+    uwsgi --ini /uwsgi.ini &
+    exec nginx -g "daemon off;"
+fi

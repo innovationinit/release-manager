@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+cd $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) || exit 1
+
+cd /release-manager # going to the main directory of the project
+
+CLASHING_MIGRATIONS=$(find . -type f -name "*.py" | grep -o ".*/migrations/[0-9]\+" | sort | uniq -c | awk '$1 > 1 {print $0}')
+if [[ $CLASHING_MIGRATIONS ]]; then
+    echo "$CLASHING_MIGRATIONS"
+    exit 1
+fi

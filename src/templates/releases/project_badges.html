@@ -1,0 +1,16 @@
+{% if project_context.has_awaiting_dev_merges or project_context.has_awaiting_maintenance_merges or project_context.has_awaiting_prod_merges or project_context.tag_changes %}
+  <span class="tags has-addons">
+    {% if project_context.has_awaiting_dev_merges %}
+      <span class="tag is-primary has-tooltip-bottom" data-tooltip="Awaiting dev release">dev</span>
+    {% endif %}
+    {% if project_context.has_awaiting_maintenance_merges %}
+      <span class="tag is-warning has-tooltip-bottom" data-tooltip="Awaiting maintenance merge">maint</span>
+    {% endif %}
+    {% if project_context.has_awaiting_prod_merges %}
+      <span class="tag is-danger has-tooltip-bottom" data-tooltip="Awaiting production merge">prod</span>
+    {% endif %}
+    {% if project_context.tag_changes %}
+      <span class="tag is-danger has-tooltip-bottom" data-tooltip="Awaiting production release">rel</span>
+    {% endif %}
+  </span>
+{% endif %}

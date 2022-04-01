@@ -1,0 +1,46 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ APP_NAME }}-backend-{{ ENV.ENVIRONMENT }}
+  namespace: {{ K8S_NAMESPACE }}
+spec:
+  replicas: {{ BACKEND_INSTANCES }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: {{ APP_NAME }}-backend-{{ ENV.ENVIRONMENT }}
+    spec:
+      containers:
+        - name: backend
+          image: {{ APP_IMAGE }}:{{ ENV.DOCKER_TAG }}
+          imagePullPolicy: "Always"
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            httpGet:
+              path: {{ HEALTHCHECK_URL }}
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+          livenessProbe:
+            httpGet:
+              path: {{ HEALTHCHECK_URL }}
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 1
+          envFrom:
+            - configMapRef:
+                name: {{ APP_NAME }}-app-config-{{ ENV.ENVIRONMENT }}
+          env:
+            - name: BACKEND_TYPE
+              value: web
+            - name: APPLICATION_TYPE
+              value: backend
+      imagePullSecrets:
+        - name: {{ DOCKER_REGISTRY_KEY }}

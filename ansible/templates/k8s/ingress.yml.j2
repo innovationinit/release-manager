@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.frontend.rule: "Host: {{ K8S_DOMAIN }}"
+    traefik.enable: true
+    traefik.backend.healthcheck.path: "{{ HEALTHCHECK_URL }}"
+    traefik.backend.healthcheck.interval: "1s"
+    traefik.ingress.kubernetes.io/whitelist-source-range: "172.20.0.0/16, 100.96.0.0/16"
+  name: {{ APP_NAME }}-{{ ENV.ENVIRONMENT }}
+  namespace: {{ K8S_NAMESPACE }}
+spec:
+  rules:
+  - host: {{ K8S_DOMAIN }}
+    http:
+      paths:
+      - backend:
+          serviceName: {{ APP_NAME }}-backend-{{ ENV.ENVIRONMENT }}
+          servicePort: 80
+        path: /

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -e
+docker build -t release-manager-developer -f Dockerfile .
+./docker/scripts/generate_docker_compose
+docker-compose up

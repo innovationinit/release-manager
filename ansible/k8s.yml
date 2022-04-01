@@ -1,0 +1,12 @@
+# vim: ft=ansible
+---
+
+- hosts: all
+  connection: local
+  gather_facts: False
+
+  tasks:
+    - name: Generate k8s file
+      template: src=templates/k8s/{{ item }}.yml.j2 dest=./../k8s/{{ item }}.yml
+      with_items:
+        - '{{ K8S_TEMPLATE }}'

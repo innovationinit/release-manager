@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+cd $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd ) || exit 1
+
+cd /release-manager  # going to the main directory of the project
+
+migrations_message=`python -Wi manage.py makemigrations --noinput --dry-run 2>/dev/null`
+
+if [[ $migrations_message != "No changes detected" ]]; then
+    echo "$migrations_message"
+    exit 1
+fi
